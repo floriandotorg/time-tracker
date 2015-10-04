@@ -1,0 +1,23 @@
+<head>
+  <title>time-tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.full.min.js"></script>
+</head>
+
+<body>
+</body>
+
+<template name="main">
+  <div class="container">
+    <h1>Time Tracker</h1>
+
+    <ul class="nav nav-tabs" id="nav">
+      <li role="presentation" class="{{isActiveRoute 'tracker'}}"><a href="{{pathFor route='tracker'}}">Tracker</a></li>
+      <li role="presentation" class="{{isActiveRoute 'projects'}}"><a href="{{pathFor route='projects'}}">Projects</a></li>
+    </ul>
+
+    {{> yield}}
+  </div>
+</template>

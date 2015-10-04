@@ -1,0 +1,16 @@
+<template name="projects">
+  <div class="container">
+    <ul id="project-list" class="nav nav-pills nav-stacked">
+      {{#each projects}}
+        <li role="presentation"><a href="{{pathFor route='project'}}">{{name}}</a></li>
+      {{/each}}
+    </ul>
+
+    <button type="button" id="add-project-button" class="btn btn-primary">Add</button>
+  </div>
+</template>
+
+<template name="project">
+  {{> quickForm collection="Projects" buttonContent="Save" id="updateProjectForm" doc=this type="update"}}
+  {{> quickRemoveButton collection="Projects" _id=this._id class="btn btn-danger" onSuccess=goBack}}
+</template>
