@@ -112,7 +112,7 @@ if (Meteor.isClient) {
       return project ? project.name : '<no project>'
     },
     hours: function() {
-      return `${calcHours(this.startTime, this.stopTime)} h`
+      return `${calcHours(this.startTime, this.stopTime)} h (${moment(this.stopTime).diff(moment(this.startTime), 'minutes')} min)`
     }
   });
 
@@ -192,7 +192,7 @@ if (Meteor.isClient) {
     startedText() {
       timerDependency.depend();
       const startTime = moment(Session.get('startTime'));
-      return `Started at ${startTime.format('HH:mm')} (${moment().diff(startTime, 'hours')} h)`;
+      return `Started at ${startTime.format('HH:mm')} (${moment().diff(moment(startTime), 'minutes')} min / ${calcHours(startTime, new Date())} h)`;
     }
   });
 
