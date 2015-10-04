@@ -219,6 +219,8 @@ if (Meteor.isClient) {
       Session.set('project', $('#select-project').val());
     });
 
+    $('#select-minutes').select2();
+
     $('#datetime').datetimepicker({
       locale: 'de',
       defaultDate: new Date(),
@@ -226,41 +228,47 @@ if (Meteor.isClient) {
     });
   };
 
+  const stopTask = function(stopTime) {
+    Session.set('started', false);
+    $('#datetime').data("DateTimePicker").minDate(false);
+    Tasks.insert({
+      description: $('#description').val(),
+      startTime: Session.get('startTime'),
+      stopTime: stopTime,
+      project: $('#select-project').val(),
+      createdAt: new Date()
+    });
+  };
+
+  const startTask = function(startTime) {
+    Session.set('started', true);
+    Session.set('startTime', startTime);
+    $('#datetime').data("DateTimePicker").minDate(Session.get('startTime'));
+  }
+
   Template.addTask.events({
     'click #start-timer': function() {
-      Session.set('started', true);
-      Session.set('startTime', new Date());
-      $('#datetime').data("DateTimePicker").minDate(Session.get('startTime'));
+      startTask(new Date());
       return false;
     },
     'click #start-timer-at': function() {
-      Session.set('started', true);
-      Session.set('startTime', $('#datetime').data("DateTimePicker").date().toDate());
-      $('#datetime').data("DateTimePicker").minDate(Session.get('startTime'));
+      startTask($('#datetime').data("DateTimePicker").date().toDate());
+      return false;
+    },
+    'click #start-timer-ago': function() {
+      startTask(moment().subtract($('#minutes').val(), 'minutes').toDate());
       return false;
     },
     'click #stop-timer': function() {
-      Session.set('started', false);
-      $('#datetime').data("DateTimePicker").minDate(false);
-      Tasks.insert({
-        description: $('#description').val(),
-        startTime: Session.get('startTime'),
-        stopTime: new Date(),
-        project: $('#select-project').val(),
-        createdAt: new Date()
-      });
+      stopTask(new Date());
       return false;
     },
     'click #stop-timer-at': function() {
-      Session.set('started', false);
-      $('#datetime').data("DateTimePicker").minDate(false);
-      Tasks.insert({
-        description: $('#description').val(),
-        startTime: Session.get('startTime'),
-        stopTime: $('#datetime').data("DateTimePicker").date().toDate(),
-        project: $('#select-project').val(),
-        createdAt: new Date()
-      });
+      stopTask($('#datetime').data("DateTimePicker").date().toDate());
+      return false;
+    },
+    'click #stop-timer-in': function() {
+      stopTask(moment().add($('#minutes').val(), 'minutes').toDate());
       return false;
     }
   });

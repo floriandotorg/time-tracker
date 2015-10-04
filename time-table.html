@@ -32,6 +32,14 @@
     </div>
 
     {{#if started}}
+      <button id="stop-timer-in" class="btn btn-danger">Stop in</button>
+    {{else}}
+      <button id="start-timer-ago" class="btn btn-primary">Start ago</button>
+    {{/if}}
+
+    <input type="number" class="form-control" min="1" placeholder="minutes" id="minutes">
+
+    {{#if started}}
       {{startedText}}
     {{/if}}
   </div>
