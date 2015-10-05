@@ -1,7 +1,10 @@
 var timerDependency = new Deps.Dependency;
 
 const calcHours = (startTime, stopTime) => {
-  const hours = moment(stopTime).diff(startTime, 'hours');
+  const minutes = moment(stopTime).diff(startTime, 'minutes');
+  const fractionHours = minutes/60;
+  const rainminingMinutes = minutes%60;
+  const hours = parseInt(fractionHours) + (rainminingMinutes > 15 ? .5 : 0) + (rainminingMinutes > 45 ? .5 : 0);
   return Math.max(hours, .5);
 }
 

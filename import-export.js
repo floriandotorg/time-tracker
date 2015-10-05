@@ -47,9 +47,9 @@ if (Meteor.isClient) {
         task.project = data.projects.find(p => p.name === task.project)._id;
 
         Tasks.insert(task);
-
-        $('#import-export-text').val('Done!');
       });
+
+      $('#import-export-text').val('Done!');
     }
   };
 }
