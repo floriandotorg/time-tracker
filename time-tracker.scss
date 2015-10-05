@@ -13,6 +13,14 @@ h1 {
   margin-bottom: 30px;
 }
 
+#select-project {
+  min-width: 120px;
+}
+
+#minutes {
+  max-width: 70px;
+}
+
 #project-list {
   margin-bottom: 20px;
 }
@@ -31,5 +39,4 @@ h1 {
 
 #summary {
   text-align: right;
-  font-weight: bold;
 }

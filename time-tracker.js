@@ -1,5 +1,3 @@
-Tasks = new Mongo.Collection("tasks");
-
 var timerDependency = new Deps.Dependency;
 
 const calcHours = (startTime, stopTime) => {
@@ -7,9 +5,20 @@ const calcHours = (startTime, stopTime) => {
   return Math.max(hours, .5);
 }
 
+const getProject = function() {
+  if (Session.get('project')) {
+    return Session.get('project');
+  }
+
+  const project = Projects.findOne({});
+  if (project) {
+    return project._id;
+  }
+}
+
 const getTasks = () => {
   return Tasks.find({
-    project: Session.get('project'),
+    project: getProject(),
     startTime: {
       $gte: new Date(Session.get('year'), Session.get('month'), 1),
       $lte: moment(new Date(Session.get('year'), Session.get('month'))).endOf('month').toDate()
@@ -22,10 +31,22 @@ if (Meteor.isClient) {
     tasks: getTasks,
 
     years: function() {
-      const startYear = moment(Tasks.findOne({project: Session.get('project')},
-        {sort: {startTime: 1}, limit: 1}).startTime).year();
-      const stopYear = moment(Tasks.findOne({project: Session.get('project')},
-        {sort: {startTime: -1}, limit: 1}).startTime).year();
+      const project = getProject();
+
+      const firstTask = Tasks.findOne({project: project},
+        {sort: {startTime: 1}, limit: 1});
+      if (!firstTask) {
+        return;
+      }
+      const startYear = moment(firstTask.startTime).year();
+
+      const lastTask = Tasks.findOne({project: project},
+        {sort: {startTime: 1}, limit: 1});
+      if (!lastTask) {
+        return;
+      }
+      const stopYear = moment(lastTask.startTime).year();
+
       var result = [];
 
       for (let n = startYear; n <= stopYear; ++n) {
@@ -39,20 +60,32 @@ if (Meteor.isClient) {
     },
 
     months: function() {
-      const startMonth = moment(Tasks.findOne({
-        project: Session.get('project'),
+      const project = getProject();
+
+      const firstTask = Tasks.findOne({
+        project: project,
         startTime: {
           $gte: new Date(Session.get('year'), 1),
           $lte: moment(new Date(Session.get('year') + 1, 1)).endOf('year').toDate()
         }
-      },{sort: {startTime: 1}, limit: 1}).startTime).month();
-      const stopMonth = moment(Tasks.findOne({
-        project: Session.get('project'),
+      },{sort: {startTime: 1}, limit: 1})
+      if (!firstTask) {
+        return;
+      }
+      const startMonth = moment(firstTask.startTime).month();
+
+      const lastTask = Tasks.findOne({
+        project: project,
         startTime: {
           $gte: new Date(Session.get('year'), 1, 1),
           $lte: moment(new Date(Session.get('year') + 1, 1)).endOf('year').toDate()
         }
-      },{sort: {startTime: -1}, limit: 1}).startTime).month();
+      },{sort: {startTime: -1}, limit: 1});
+      if (!lastTask) {
+        return;
+      }
+      const stopMonth = moment(lastTask.startTime).month();
+
       var result = [];
 
       for (let n = startMonth; n <= stopMonth; ++n) {
@@ -69,9 +102,9 @@ if (Meteor.isClient) {
     summary: function() {
       const tasks = getTasks().fetch();
       const hours = _.reduce(tasks, (n, t) => { return n + calcHours(t.startTime, t.stopTime) }, 0);
-      const project = Projects.findOne({_id: Session.get('project')});
+      const project = Projects.findOne(Session.get('project') ? {_id: Session.get('project')} : {});
       const salary = hours * project.hourlyRate;
-      return `${salary} € =  ${hours} h * ${project.hourlyRate} € HR`;
+      return `<strong>${salary} €</strong> =  ${hours} h * ${project.hourlyRate} € HR`;
     }
   });
 
@@ -198,11 +231,6 @@ if (Meteor.isClient) {
 
   Template.addTask.created = function() {
     this.duration = new ReactiveVar(0);
-
-    if(!Session.get('project')) {
-      Session.set('project', Projects.findOne({})._id);
-    }
-
     this.timerHandle = Meteor.setInterval(() => {
       timerDependency.changed();
     }, 1000);

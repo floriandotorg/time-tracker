@@ -37,7 +37,7 @@
       <button id="start-timer-ago" class="btn btn-primary">Start ago</button>
     {{/if}}
 
-    <input type="number" class="form-control" min="1" placeholder="minutes" id="minutes">
+    <input type="number" class="form-control" min="1" placeholder="min" id="minutes">
 
     {{#if started}}
       {{startedText}}
@@ -86,7 +86,7 @@
     </tbody>
   </table>
 
-  <p id="summary">{{summary}}</p>
+  <p id="summary">{{{summary}}}</p>
 </template>
 
 <template name="task">

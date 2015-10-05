@@ -1,27 +1,3 @@
-Projects = new Mongo.Collection("projects");
-Projects.attachSchema(new SimpleSchema({
-  name: {
-    type: String,
-    label: "Name",
-    max: 200,
-    optional: true
-  },
-  hourlyRate: {
-    type: Number,
-    label: "Hourly Rate (EUR)",
-    min: 0,
-    autoform: {
-      defaultValue: 65
-    }
-  },
-  hoursPerDay: {
-    type: Number,
-    label: "Hours per Day",
-    min: 0,
-    optional: true
-  }
-}));
-
 Router.route('/projects', {name: 'projects'});
 Router.route('/project/:_id', {
   name: 'project',
@@ -55,7 +31,10 @@ if (Meteor.isClient) {
 
   Template.projects.events = {
     'click #add-project-button': function() {
-      const project = Projects.insert({});
+      const project = Projects.insert({
+        name: 'Project',
+        hourlyRate: 65
+      });
       Router.go(`/project/${project}`);
 
     }
