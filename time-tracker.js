@@ -105,7 +105,7 @@ if (Meteor.isClient) {
     summary: function() {
       const tasks = getTasks().fetch();
       const hours = _.reduce(tasks, (n, t) => { return n + calcHours(t.startTime, t.stopTime) }, 0);
-      const project = Projects.findOne(Session.get('project') ? {_id: Session.get('project')} : {});
+      const project = Projects.findOne({_id: getProject()});
       const salary = hours * project.hourlyRate;
       return `<strong>${salary} €</strong> =  ${hours} h * ${project.hourlyRate} € HR`;
     }
@@ -218,6 +218,18 @@ if (Meteor.isClient) {
     });
   };
 
+  const hoursToday = function() {
+    const tasks = Tasks.find({
+      project: getProject(),
+      startTime: {
+        $gte: moment().startOf('day').toDate(),
+        $lte: moment().endOf('day').toDate()
+      }
+    }).fetch();
+    const hours = _.reduce(tasks, (n, t) => { return n + calcHours(t.startTime, t.stopTime) }, 0);
+    return hours + (Session.get('started') ? calcHours(moment(Session.get('startTime')), new Date()) : 0);
+  }
+
   Template.addTask.helpers({
     projects() {
       return Projects.find();
@@ -229,6 +241,32 @@ if (Meteor.isClient) {
       timerDependency.depend();
       const startTime = moment(Session.get('startTime'));
       return `Started at ${startTime.format('HH:mm')} (${moment().diff(moment(startTime), 'minutes')} min / ${calcHours(startTime, new Date())} h)`;
+    },
+    showPanel: function() {
+      const project = Projects.findOne({_id: getProject()});
+      return !!project.hoursPerDay || Session.get('started');
+    },
+    hasHoursPerDay: function() {
+      const project = Projects.findOne({_id: getProject()});
+      return !!project.hoursPerDay;
+    },
+    progress: function() {
+      timerDependency.depend();
+      const project = Projects.findOne({_id: getProject()});
+      return Math.min(hoursToday() / project.hoursPerDay * 100, 100);
+    },
+    progressText: function() {
+      timerDependency.depend();
+      const project = Projects.findOne({_id: getProject()});
+      const hours = hoursToday();
+      if (hours) {
+        return `${hours} h / ${project.hoursPerDay} h`;
+      }
+    },
+    success: function() {
+      timerDependency.depend();
+      const project = Projects.findOne({_id: getProject()});
+      return hoursToday() >= project.hoursPerDay;
     }
   });
 
@@ -236,7 +274,7 @@ if (Meteor.isClient) {
     this.duration = new ReactiveVar(0);
     this.timerHandle = Meteor.setInterval(() => {
       timerDependency.changed();
-    }, 1000);
+    }, 1000 * 15);
   };
 
   Template.addTask.destroyed = function() {

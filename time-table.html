@@ -39,8 +39,21 @@
 
     <input type="number" class="form-control" min="1" placeholder="min" id="minutes">
 
-    {{#if started}}
-      {{startedText}}
+    {{#if showPanel}}
+      <div id="progress" class="panel panel-default">
+        {{#if started}}
+          <div class="panel-heading">{{startedText}}</div>
+        {{/if}}
+        {{#if hasHoursPerDay}}
+          <div class="panel-body">
+            <div class="progress">
+              <div class="progress-bar {{#if started}}progress-bar-striped active{{/if}} {{#if success}}progress-bar-success{{/if}}" role="progressbar" style="width: {{progress}}%;">
+                {{progressText}}
+              </div>
+            </div>
+          </div>
+        {{/if}}
+      </div>
     {{/if}}
   </div>
 </template>
